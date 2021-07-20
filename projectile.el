@@ -1034,9 +1034,9 @@ discover projects there."
           (when (and (file-directory-p dir)
                      (not (member (file-name-nondirectory dir) '(".." "."))))
             (if (and (numberp depth) (> depth 0))
-	        (projectile-discover-projects-in-directory dir (1- depth))
+	              (projectile-discover-projects-in-directory dir (1- depth))
               (when (projectile-project-p dir)
-	        (projectile-add-known-project dir))))))
+	              (projectile-add-known-project dir))))))
     (message "Project search path directory %s doesn't exist" directory)))
 
 ;;;###autoload
@@ -1046,7 +1046,7 @@ Invoked automatically when `projectile-mode' is enabled."
   (interactive)
   (dolist (path projectile-project-search-path)
     (if (consp path)
-	(projectile-discover-projects-in-directory (car path) (cdr path))
+	      (projectile-discover-projects-in-directory (car path) (cdr path))
       (projectile-discover-projects-in-directory path 0))))
 
 
@@ -1584,7 +1584,7 @@ choices."
   (projectile-completing-read
    prompt
    (delete (buffer-name (current-buffer))
-           (projectile-project-buffer-names))))
+           (projectile-project-buffer-names) :category 'buffer)))
 
 ;;;###autoload
 (defun projectile-switch-to-buffer ()
@@ -1614,7 +1614,7 @@ choices."
   (display-buffer
    (projectile-completing-read
     "Display buffer: "
-    (projectile-project-buffer-names))))
+    (projectile-project-buffer-names) :category 'buffer)))
 
 ;;;###autoload
 (defun projectile-project-buffers-other-buffer ()
@@ -1878,7 +1878,7 @@ Never use on many files since it's going to recalculate the
 project-root for every file."
   (expand-file-name name (projectile-project-root)))
 
-(cl-defun projectile-completing-read (prompt choices &key initial-input action)
+(cl-defun projectile-completing-read (prompt choices &key initial-input action category)
   "Present a project tailored PROMPT with CHOICES."
   (let ((prompt (projectile-prepend-project-name prompt))
         res)
@@ -1890,18 +1890,21 @@ project-root for every file."
                       ((bound-and-true-p ivy-mode)  'ivy)
                       (t 'default))
                    projectile-completion-system)
-            ('default (completing-read prompt choices nil nil initial-input))
+            ('default (completing-read prompt (lambda (string predicate action)
+                                                (if (eq action 'metadata)
+                                                    `(metadata (category . ,category))
+                                                  (complete-with-action action choices string predicate)))))
             ('ido (ido-completing-read prompt choices nil nil initial-input))
             ('helm
              (if (and (fboundp 'helm)
                       (fboundp 'helm-make-source))
                  (helm :sources
                        (helm-make-source "Projectile" 'helm-source-sync
-                                         :candidates choices
-                                         :action (if action
-                                                     (prog1 action
-                                                       (setq action nil))
-                                                   #'identity))
+                         :candidates choices
+                         :action (if action
+                                     (prog1 action
+                                       (setq action nil))
+                                   #'identity))
                        :prompt prompt
                        :input initial-input
                        :buffer "*helm-projectile*")
@@ -2157,9 +2160,9 @@ Subroutine for `projectile-find-file-dwim' and
          (file (cond ((= (length files) 1)
                       (car files))
                      ((> (length files) 1)
-                      (projectile-completing-read "Switch to: " files))
+                      (projectile-completing-read "Switch to: " files :category 'file))
                      (t
-                      (projectile-completing-read "Switch to: " project-files))))
+                      (projectile-completing-read "Switch to: " project-files :category 'project-file))))
          (ff (or ff-variant #'find-file)))
     (funcall ff (expand-file-name file project-root))
     (run-hooks 'projectile-find-file-hook)))
@@ -2256,7 +2259,7 @@ would be `find-file-other-window' or `find-file-other-frame'"
   (projectile-maybe-invalidate-cache invalidate-cache)
   (let* ((project-root (projectile-acquire-root))
          (file (projectile-completing-read "Find file: "
-                                           (projectile-project-files project-root)))
+                                           (projectile-project-files project-root) :category 'project-file))
          (ff (or ff-variant #'find-file)))
     (when file
       (funcall ff (expand-file-name file project-root))
@@ -2387,7 +2390,8 @@ With a prefix arg INVALIDATE-CACHE invalidates the cache first."
      "Find dir: "
      (if projectile-find-dir-includes-top-level
          (append '("./") project-dirs)
-       project-dirs))))
+       project-dirs)
+     :category 'project-file)))
 
 ;;;###autoload
 (defun projectile-find-test-file (&optional invalidate-cache)
@@ -2397,7 +2401,7 @@ With a prefix arg INVALIDATE-CACHE invalidates the cache first."
   (interactive "P")
   (projectile-maybe-invalidate-cache invalidate-cache)
   (let ((file (projectile-completing-read "Find test file: "
-                                          (projectile-current-project-test-files))))
+                                          (projectile-current-project-test-files) :category 'project-file)))
     (find-file (expand-file-name file (projectile-project-root)))))
 
 (defun projectile-test-files (files)
@@ -2483,7 +2487,7 @@ If KIND is not provided, a list of possible kinds can be chosen."
     (if-let ((available-kinds (projectile--related-files-kinds file)))
         (setq kind (if (= (length available-kinds) 1)
                        (car available-kinds)
-                     (intern (projectile-completing-read "Kind :" available-kinds))))
+                     (intern (projectile-completing-read "Kind :" available-kinds :category 'project-file))))
       (error "No related files found")))
 
   (if-let ((candidates (projectile--related-files file kind)))
@@ -2597,13 +2601,13 @@ from the other lists.  Settings in the last list are the most significant
 ones and overrule settings in the other lists.  nil values are ignored in
 all but the first plist."
   (let ((rtn (copy-sequence (pop plists)))
-	p v ls)
+	      p v ls)
     (while plists
       (setq ls (pop plists))
       (while ls
-	(setq p (pop ls) v (pop ls))
+	      (setq p (pop ls) v (pop ls))
         (when v
-	  (setq rtn (plist-put rtn p v)))))
+	        (setq rtn (plist-put rtn p v)))))
     rtn))
 
 (cl-defun projectile--build-project-plist
@@ -2686,25 +2690,25 @@ test/impl/other files as below:
   (setq projectile-project-types
         (cons `(,project-type .
                               ,(projectile--build-project-plist
-                                 marker-files
-                                 :project-file project-file
-                                 :compilation-dir compilation-dir
-                                 :configure configure
-                                 :compile compile
-                                 :install install
-                                 :package package
-                                 :test test
-                                 :run run
-                                 :test-suffix test-suffix
-                                 :test-prefix test-prefix
-                                 :src-dir src-dir
-                                 :test-dir test-dir
-                                 :related-files-fn related-files-fn))
-                projectile-project-types)))
+                                marker-files
+                                :project-file project-file
+                                :compilation-dir compilation-dir
+                                :configure configure
+                                :compile compile
+                                :install install
+                                :package package
+                                :test test
+                                :run run
+                                :test-suffix test-suffix
+                                :test-prefix test-prefix
+                                :src-dir src-dir
+                                :test-dir test-dir
+                                :related-files-fn related-files-fn))
+              projectile-project-types)))
 
 (cl-defun projectile-update-project-type
     (project-type &key marker-files project-file compilation-dir configure compile install package test run test-suffix test-prefix src-dir test-dir related-files-fn)
-    "Update an existing projectile project type.
+  "Update an existing projectile project type.
 
 Non-nil passed items will override existing values for the project type given
 by PROJECT-TYPE.  Raise an error if PROJECT-TYPE is not already registered
@@ -2733,35 +2737,35 @@ test/impl/other files as below:
     CUSTOM-FUNCTION accepts FILE as relative path from the project root and returns
     a plist containing :test, :impl or :other as key and the relative path/paths or
     predicate as value.  PREDICATE accepts a relative path as the input."
-    (if-let ((existing-project-plist
-              (cl-find-if
-               (lambda (p) (eq project-type (car p))) projectile-project-types))
-             (new-plist
-              (projectile--build-project-plist
-               marker-files
-               :project-file project-file
-               :compilation-dir compilation-dir
-               :configure configure
-               :compile compile
-               :install install
-               :package package
-               :test test
-               :run run
-               :test-suffix test-suffix
-               :test-prefix test-prefix
-               :src-dir src-dir
-               :test-dir test-dir
-               :related-files-fn related-files-fn))
-             (merged-plist
-              (projectile--combine-plists
-               (cdr existing-project-plist) new-plist))
-             (project-type-elt (cons project-type merged-plist)))
-        (setq projectile-project-types
-              (mapcar (lambda (p) (if (eq project-type (car p))
-                                      project-type-elt
-                                    p))
-                      projectile-project-types))
-      (error "No existing project found for: %s" project-type)))
+  (if-let ((existing-project-plist
+            (cl-find-if
+             (lambda (p) (eq project-type (car p))) projectile-project-types))
+           (new-plist
+            (projectile--build-project-plist
+             marker-files
+             :project-file project-file
+             :compilation-dir compilation-dir
+             :configure configure
+             :compile compile
+             :install install
+             :package package
+             :test test
+             :run run
+             :test-suffix test-suffix
+             :test-prefix test-prefix
+             :src-dir src-dir
+             :test-dir test-dir
+             :related-files-fn related-files-fn))
+           (merged-plist
+            (projectile--combine-plists
+             (cdr existing-project-plist) new-plist))
+           (project-type-elt (cons project-type merged-plist)))
+      (setq projectile-project-types
+            (mapcar (lambda (p) (if (eq project-type (car p))
+                                    project-type-elt
+                                  p))
+                    projectile-project-types))
+    (error "No existing project found for: %s" project-type)))
 
 (defun projectile-cabal-project-p ()
   "Check if a project contains *.cabal files but no stack.yaml file."
@@ -2800,9 +2804,9 @@ test/impl/other files as below:
    (version-list-<= version (projectile--cmake-version))))
 
 (defconst projectile--cmake-command-presets-minimum-version-alist
-    '((:configure-command . (3 19))
-      (:compile-command . (3 20))
-      (:test-command . (3 20))))
+  '((:configure-command . (3 19))
+    (:compile-command . (3 20))
+    (:test-command . (3 20))))
 
 (defun projectile--cmake-command-presets-supported (command-type)
   "Check if CMake supports presets for COMMAND-TYPE."
@@ -2813,10 +2817,10 @@ test/impl/other files as below:
 (defun projectile--cmake-read-preset (filename)
   "Read CMake preset from FILENAME."
   (when (file-exists-p filename)
-        (with-temp-buffer
-          (insert-file-contents filename)
-          (when (functionp 'json-parse-buffer)
-            (json-parse-buffer :array-type 'list)))))
+    (with-temp-buffer
+      (insert-file-contents filename)
+      (when (functionp 'json-parse-buffer)
+        (json-parse-buffer :array-type 'list)))))
 
 (defconst projectile--cmake-command-preset-array-id-alist
   '((:configure-command . "configurePresets")
@@ -3562,7 +3566,7 @@ concatenated with FILENAME-FN applied to the file name of FILE-PATH."
   "Choose one item from CANDIDATES."
   (if (= (length candidates) 1)
       (car candidates)
-    (projectile-completing-read "Switch to: " candidates)))
+    (projectile-completing-read "Switch to: " candidates :category 'project-file)))
 
 (defun projectile-find-matching-test (impl-file)
   "Compute the name of the test matching IMPL-FILE."
@@ -4270,7 +4274,7 @@ directory to open."
       (find-file (projectile-expand-root
                   (projectile-completing-read
                    "Recently visited files: "
-                   (projectile-recentf-files))))
+                   (projectile-recentf-files) :category 'project-file)))
     (message "recentf is not enabled")))
 
 (defun projectile-recentf-files ()
@@ -4876,7 +4880,7 @@ This command will first prompt for the directory the file is in."
     (if (projectile-project-p)
         ;; target directory is in a project
         (let ((file (projectile-completing-read "Find file: "
-                                                (projectile-dir-files directory))))
+                                                (projectile-dir-files directory) :category 'project-file)))
           (find-file (expand-file-name file directory))
           (run-hooks 'projectile-find-file-hook))
       ;; target directory is not in a project
@@ -4896,7 +4900,7 @@ This command will first prompt for the directory the file is in."
 (defun projectile-find-file-in-known-projects ()
   "Jump to a file in any of the known projects."
   (interactive)
-  (find-file (projectile-completing-read "Find file in projects: " (projectile-all-project-files))))
+  (find-file (projectile-completing-read "Find file in projects: " (projectile-all-project-files) :category 'project-file)))
 
 (defun projectile-keep-project-p (project)
   "Determine whether we should cleanup (remove) PROJECT or not.
