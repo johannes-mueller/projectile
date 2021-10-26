@@ -2,7 +2,7 @@
 
 ;; Copyright © 2011-2021 Bozhidar Batsov
 
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
+;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -747,7 +747,7 @@ Just delegates OPERATION and ARGS for all operations except for`shell-command`'.
         ;; After listing all the files, the cache should have been updated.
         (projectile-current-project-files)
         ;; find returns the leading ./ therefore the somewhat odd notation here
-        (dolist (f '("./file1.el" "./file2.el"))
+        (dolist (f '("file1.el" "file2.el"))
           (expect (member f (gethash (projectile-project-root) projectile-projects-cache)) :to-be-truthy))))))
   (it "ensures that we don't cache a project root if the path has changed."
     (projectile-test-with-sandbox
@@ -1686,6 +1686,17 @@ projectile-process-current-project-buffers-current to have similar behaviour"
         (projectile-process-current-project-buffers (lambda (b) (push b list-a)))
         (projectile-process-current-project-buffers-current (lambda () (push (current-buffer) list-b)))
         (expect list-a :to-equal list-b))))))
+
+(describe "projectile-project-buffers"
+          (it "return project buffers"
+              (projectile-test-with-sandbox
+               (projectile-test-with-files
+                ("project1/"
+                 "project1/.projectile"
+                 "project1/foo")
+                (cd "project1")
+                (with-current-buffer (find-file-noselect "foo" t))
+                (expect (length (projectile-project-buffers)) :to-equal 1)))))
 
 (describe "projectile--impl-name-for-test-name"
   :var ((mock-projectile-project-types

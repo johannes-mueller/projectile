@@ -1,9 +1,10 @@
 # Projectile
 
-[![License GPL 3][badge-license]](http://www.gnu.org/licenses/gpl-3.0.txt)
+[![Build Status](https://github.com/bbatsov/projectile/workflows/CI/badge.svg)](https://github.com/bbatsov/projectile/actions?query=workflow%3ACI)
 [![MELPA](http://melpa.org/packages/projectile-badge.svg)](http://melpa.org/#/projectile)
 [![MELPA Stable](http://stable.melpa.org/packages/projectile-badge.svg)](http://stable.melpa.org/#/projectile)
-[![Build Status](https://github.com/bbatsov/projectile/workflows/CI/badge.svg)](https://github.com/bbatsov/projectile/actions?query=workflow%3ACI)
+[![NonGNU ELPA](https://elpa.nongnu.org/nongnu/projectile.svg)](https://elpa.nongnu.org/nongnu/projectile.html)
+[![License GPL 3][badge-license]](http://www.gnu.org/licenses/gpl-3.0.txt)
 
 ## Synopsis
 
@@ -43,7 +44,7 @@ Here are some of Projectile's features:
 [![Patreon](https://img.shields.io/badge/patreon-donate-orange.svg)](https://www.patreon.com/bbatsov)
 [![Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GRQKNBM6P8VRQ)
 
-I've been developing Projectile for a decade now. While it's a fun
+I've been developing Projectile for a decade now (since 2011). While it's a fun
 project to work on, it still requires a lot of time and energy to
 maintain.
 
@@ -75,8 +76,8 @@ details.
 
 `package.el` is the built-in package manager in Emacs.
 
-Projectile is available on the two major `package.el` community
-maintained repos -
+Projectile is available on all major `package.el` community
+maintained repos - [NonGNU ELPA](https://elpa.nongnu.org),
 [MELPA Stable](http://stable.melpa.org)
 and [MELPA](http://melpa.org).
 
@@ -111,8 +112,8 @@ See the [online documentation](https://docs.projectile.mx) for more details.
   utilities such as `find`.
 * Commands depending on external utilities might misbehave on the `fish` shell.
 * Using Projectile over TRAMP might be slow in certain cases.
-* Some commands might misbehave on complex project setups (e.g. a git project with submodules)
-* Projectile was mostly tested on Unix OS-es (e.g. GNU/Linux and macOS), so some functionality might not work well on Windows
+* Some commands might misbehave on complex project setups (e.g. a git project with submodules).
+* Projectile was mostly tested on Unix OS-es (e.g. GNU/Linux and macOS), so some functionality might not work well on Windows.
 
 ## Known issues
 
@@ -124,7 +125,9 @@ and send me a pull request. :-)
 ## Contributors
 
 Here's a [list](https://github.com/bbatsov/projectile/contributors) of all the people who have contributed to the
-development of Projectile.
+development of Projectile (a.k.a. Projectile's Hall of Fame).
+
+Joining this esteemed group of people is only a commit away!
 
 ## Changelog
 

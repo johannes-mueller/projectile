@@ -4,19 +4,40 @@
 
 ### New features
 
-* [#1680](https://github.com/bbatsov/projectile/pull/1680): Add support for recursive project discovery
+* [#1699](https://github.com/bbatsov/projectile/pull/1699): `projectile-ripgrep` now supports [`rg.el`](https://github.com/dajva/rg.el).
+* [#1712](https://github.com/bbatsov/projectile/issues/1712): Make it possible to hide Projectile's menu. See `projectile-show-menu`.
+
+### Bugs fixed
+
+* [#1514](https://github.com/bbatsov/projectile/issues/1514): Fix `projectile-ag` global ignores not in effect.
+
+### Changes
+
+* [#1447](https://github.com/bbatsov/projectile/issues/1447): Restructure the menu.
+
+## 2.5.0 (2021-08-10)
+
+### New features
+
+* [#1680](https://github.com/bbatsov/projectile/pull/1680): Add support for recursive project discovery.
 * [#1671](https://github.com/bbatsov/projectile/pull/1671)/[#1679](https://github.com/bbatsov/projectile/pull/1679) Allow the `:test-dir` and `:src-dir` options of a project to be set to functions for more flexible test switching.
+* [#1672](https://github.com/bbatsov/projectile/pull/1672): Add `projectile-<cmd>-use-comint-mode` variables (where `<cmd>` is `configure`, `compile`, `test`, `install`, `package`, or `run`). These enable interactive compilation buffers.
+* [#1705](https://github.com/bbatsov/projectile/pull/1705): Add project detection for Nix flakes
 
 ### Bugs fixed
 
 * [#1550](https://github.com/bbatsov/projectile/issues/1550): Make `projectile-regenerate-tags` tramp-aware.
 * [#1673](https://github.com/bbatsov/projectile/issues/1673): Fix CMake system-preset filename.
+* [#1691](https://github.com/bbatsov/projectile/pull/1691): Fix `compilation-find-file` advice handling of directory.
+
+### Changes
+
+* Remove `pkg-info` dependency.
 
 ## 2.4.0 (2021-05-27)
 
 ### New features
 
-* Add `projectile-<cmd>-use-comint-mode` variables (where `<cmd>` is `configure`, `compile`, `test`, `install`, `package`, or `run`). These enable interactive compilation buffers.
 * Add `projectile-update-project-type` function for updating the properties of existing project types.
 * [#1658](https://github.com/bbatsov/projectile/pull/1658): New command `projectile-reset-known-projects`.
 * [#1656](https://github.com/bbatsov/projectile/pull/1656): Add support for CMake configure, build and test presets. Enabled by setting `projectile-cmake-presets` to non-nil, disabled by default.
